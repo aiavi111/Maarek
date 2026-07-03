@@ -3,21 +3,17 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { BadgeCheck, ChevronDown, Clock, MapPin, Share, Star } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, ChevronDown, Clock, MapPin, Share, Star } from "lucide-react";
 import { RESTAURANT } from "@/data/menu";
-import { useFavorites } from "@/store/favorites";
-import { FavHeart } from "@/components/fav-heart";
 import { IconButton } from "@/components/ui/icon-button";
 import { Logo } from "@/components/logo";
-import { money, plural } from "@/lib/utils";
+import { plural } from "@/lib/utils";
 
 const spring = { type: "spring", stiffness: 220, damping: 26 } as const;
 
 export function Hero() {
   const { scrollY } = useScroll();
   const parallax = useTransform(scrollY, [0, 460], [0, 140]);
-  const favActive = useFavorites((s) => s.ids.includes("__restaurant__"));
-  const toggleFav = useFavorites((s) => s.toggle);
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
@@ -77,18 +73,12 @@ export function Hero() {
             Доставка · <span>Дом</span>
             <ChevronDown size={14} className="text-white/70" />
           </button>
-          <div className="flex items-center gap-2.5">
-            <IconButton
-              label={copied ? "Ссылка скопирована" : "Поделиться"}
-              onClick={share}
-            >
-              {copied ? <BadgeCheck size={18} /> : <Share size={17} />}
-            </IconButton>
-            <FavHeart
-              active={favActive}
-              onToggle={() => toggleFav("__restaurant__")}
-            />
-          </div>
+          <IconButton
+            label={copied ? "Ссылка скопирована" : "Поделиться"}
+            onClick={share}
+          >
+            {copied ? <BadgeCheck size={18} /> : <Share size={17} />}
+          </IconButton>
         </motion.div>
 
         {/* имя ресторана */}
@@ -130,42 +120,35 @@ export function Hero() {
         </div>
       </div>
 
-      {/* ── карточка условий ── */}
-      <motion.div
+      {/* ── адрес: ведёт на карточку в 2ГИС ── */}
+      <motion.a
+        href="https://2gis.kg/bishkek/firm/70000001104039407"
+        target="_blank"
+        rel="noopener noreferrer"
         initial={{ y: 32, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
+        whileTap={{ scale: 0.98 }}
         transition={{ ...spring, delay: 0.42 }}
-        className="relative z-10 mx-5 -mt-1 rounded-3xl border border-line bg-card/85 backdrop-blur-2xl p-4 shadow-lift lg:mx-auto lg:-mt-14 lg:max-w-[760px]"
+        className="relative z-10 mx-5 -mt-1 flex items-center gap-3.5 rounded-3xl border border-line bg-card/85 backdrop-blur-2xl p-4 shadow-lift cursor-pointer lg:mx-auto lg:-mt-14 lg:max-w-[760px]"
+        aria-label="Открыть адрес в 2ГИС"
       >
-        <div className="grid grid-cols-3 divide-x divide-line text-center">
-          <div className="px-2">
-            <p className="text-[15px] font-bold tabular-nums">
-              {money(RESTAURANT.deliveryFee)}
-            </p>
-            <p className="mt-0.5 text-[11px] text-dim font-medium leading-tight">
-              Доставка · 0 с от {money(RESTAURANT.freeDeliveryOver)}
-            </p>
-          </div>
-          <div className="px-2">
-            <p className="text-[15px] font-bold tabular-nums">
-              {money(RESTAURANT.minOrder)}
-            </p>
-            <p className="mt-0.5 text-[11px] text-dim font-medium">Мин. заказ</p>
-          </div>
-          <div className="px-2">
-            <p className="flex items-center justify-center gap-1.5 text-[15px] font-bold">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf/50" />
-                <span className="relative inline-flex size-2 rounded-full bg-leaf" />
-              </span>
-              Открыто
-            </p>
-            <p className="mt-0.5 text-[11px] text-dim font-medium tabular-nums">
-              {RESTAURANT.hours}
-            </p>
-          </div>
-        </div>
-      </motion.div>
+        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent text-onfg">
+          <MapPin size={19} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[14.5px] font-bold">
+            {RESTAURANT.address}
+          </span>
+          <span className="mt-0.5 flex items-center gap-1.5 text-[12px] font-medium text-dim">
+            <span className="relative flex size-1.5">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf/50" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-leaf" />
+            </span>
+            Открыто · {RESTAURANT.hours} · Смотреть в 2ГИС
+          </span>
+        </span>
+        <ArrowUpRight size={18} className="shrink-0 text-dim" />
+      </motion.a>
     </header>
   );
 }

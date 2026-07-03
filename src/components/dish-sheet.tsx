@@ -7,14 +7,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Clock, Star, TriangleAlert, X } from "lucide-react";
 import type { Dish } from "@/types";
 import { useCart } from "@/store/cart";
-import { useFavorites } from "@/store/favorites";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { DishBadges } from "@/components/ui/dish-badges";
 import { Segmented } from "@/components/ui/segmented";
 import { Stepper } from "@/components/ui/stepper";
-import { FavHeart } from "@/components/fav-heart";
 import { cn, haptic, money } from "@/lib/utils";
 
 interface DishSheetProps {
@@ -39,8 +37,6 @@ export function DishSheet({ dish, onClose }: DishSheetProps) {
 
 function DishSheetBody({ dish, onClose }: { dish: Dish; onClose: () => void }) {
   const add = useCart((s) => s.add);
-  const fav = useFavorites((s) => s.ids.includes(dish.id));
-  const toggleFav = useFavorites((s) => s.toggle);
 
   const [sizeId, setSizeId] = useState(dish.sizes?.[0]?.id ?? "std");
   const [extras, setExtras] = useState<string[]>([]);
@@ -95,12 +91,9 @@ function DishSheetBody({ dish, onClose }: { dish: Dish; onClose: () => void }) {
       <div className="space-y-6 px-6 pb-8 pt-5">
         {/* заголовок */}
         <div>
-          <div className="flex items-start justify-between gap-4">
-            <h2 className="text-[24px] font-extrabold leading-tight tracking-tight">
-              {dish.name}
-            </h2>
-            <FavHeart active={fav} onToggle={() => toggleFav(dish.id)} size="sm" />
-          </div>
+          <h2 className="text-[24px] font-extrabold leading-tight tracking-tight">
+            {dish.name}
+          </h2>
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px] font-medium text-mute">
             <span className="flex items-center gap-1 font-bold text-fg">
               <Star size={13.5} className="fill-star text-star" />

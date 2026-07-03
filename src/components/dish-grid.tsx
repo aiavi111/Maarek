@@ -20,7 +20,7 @@ export function DishGrid({ dishes, loading, heading, onOpen, onReset }: DishGrid
   if (loading) {
     return (
       <div
-        className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-5 px-5 pt-6 lg:grid-cols-2 lg:gap-6 lg:px-8 xl:grid-cols-3 2xl:grid-cols-4"
+        className="mx-auto grid w-full max-w-[1440px] grid-cols-2 gap-3 px-5 pt-6 sm:gap-4 lg:grid-cols-3 lg:gap-5 lg:px-8 xl:grid-cols-4 2xl:grid-cols-5"
         aria-busy="true"
         aria-label="Загружаем меню"
       >
@@ -62,7 +62,7 @@ export function DishGrid({ dishes, loading, heading, onOpen, onReset }: DishGrid
       ) : (
         <motion.div
           layout
-          className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6 xl:grid-cols-3 2xl:grid-cols-4"
+          className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 2xl:grid-cols-5"
         >
           <AnimatePresence mode="popLayout" initial={false}>
             {dishes.map((dish) => (
