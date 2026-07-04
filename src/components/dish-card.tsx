@@ -1,42 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { Check, Plus, Star } from "lucide-react";
+import { motion } from "framer-motion";
+import { Star } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import type { Dish } from "@/types";
-import { useCart } from "@/store/cart";
 import { DishBadges } from "@/components/ui/dish-badges";
-import { haptic, money } from "@/lib/utils";
+import { money } from "@/lib/utils";
 
 interface DishCardProps {
   dish: Dish;
   onOpen: (dish: Dish) => void;
 }
 
-/** компактная карточка: две в ряд на телефоне, детали — в шторке блюда */
+/** компактная карточка-витрина: тап открывает блюдо, заказ — через WhatsApp */
 export function DishCard({ dish, onOpen }: DishCardProps) {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
-  const add = useCart((s) => s.add);
-  const [justAdded, setJustAdded] = useState(false);
-
-  const quickAdd = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    haptic(12);
-    const size = dish.sizes?.[0];
-    add({
-      key: `${dish.id}|${size?.id ?? "std"}`,
-      dishId: dish.id,
-      name: dish.name,
-      image: dish.images[0],
-      unitPrice: dish.price + (size?.priceDelta ?? 0),
-      sizeLabel: size?.label,
-      addOns: [],
-    });
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 900);
-  };
 
   return (
     <motion.article
@@ -54,7 +33,6 @@ export function DishCard({ dish, onOpen }: DishCardProps) {
       onKeyDown={(e) => e.key === "Enter" && onOpen(dish)}
       aria-label={`${dish.name}, ${money(dish.price)}`}
     >
-      {/* фото */}
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-card2">
         <Image
           src={dish.images[0]}
@@ -70,7 +48,6 @@ export function DishCard({ dish, onOpen }: DishCardProps) {
         </span>
       </div>
 
-      {/* текст */}
       <div className="flex min-h-0 flex-1 flex-col px-1.5 pt-2.5">
         <h3 className="line-clamp-2 text-[14px] font-bold leading-snug tracking-tight">
           {dish.name}
@@ -81,36 +58,9 @@ export function DishCard({ dish, onOpen }: DishCardProps) {
           <span className="font-medium text-dim">({dish.reviews})</span>
           <span className="text-dim">· {dish.weight} г</span>
         </p>
-
-        <div className="mt-auto flex items-center justify-between pt-2.5">
-          <p className="text-[16px] font-extrabold tabular-nums tracking-tight">
-            {money(dish.price)}
-          </p>
-          <motion.button
-            whileTap={{ scale: 0.82 }}
-            transition={{ type: "spring", stiffness: 520, damping: 24 }}
-            onClick={quickAdd}
-            aria-label={`Добавить «${dish.name}» в корзину`}
-            className="grid size-10 place-items-center rounded-full bg-accent text-onfg shadow-lift cursor-pointer"
-          >
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span
-                key={justAdded ? "check" : "plus"}
-                initial={{ scale: 0.3, opacity: 0, rotate: -90 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.3, opacity: 0, rotate: 90 }}
-                transition={{ type: "spring", stiffness: 500, damping: 26 }}
-                className="flex"
-              >
-                {justAdded ? (
-                  <Check size={17} strokeWidth={3} />
-                ) : (
-                  <Plus size={17} strokeWidth={2.8} />
-                )}
-              </motion.span>
-            </AnimatePresence>
-          </motion.button>
-        </div>
+        <p className="mt-auto pt-2.5 text-[16px] font-extrabold tabular-nums tracking-tight text-accent">
+          {money(dish.price)}
+        </p>
       </div>
     </motion.article>
   );

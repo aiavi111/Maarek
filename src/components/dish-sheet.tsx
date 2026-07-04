@@ -4,15 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Clock, Star, TriangleAlert, X } from "lucide-react";
+import { Check, Clock, MessageCircle, Star, TriangleAlert, X } from "lucide-react";
 import type { Dish } from "@/types";
-import { useCart } from "@/store/cart";
+import { WHATSAPP } from "@/data/menu";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { DishBadges } from "@/components/ui/dish-badges";
 import { Segmented } from "@/components/ui/segmented";
-import { Stepper } from "@/components/ui/stepper";
 import { cn, haptic, money } from "@/lib/utils";
 
 interface DishSheetProps {
@@ -36,14 +35,11 @@ export function DishSheet({ dish, onClose }: DishSheetProps) {
 /* ────────────────────────────────────────────────────────── */
 
 function DishSheetBody({ dish, onClose }: { dish: Dish; onClose: () => void }) {
-  const add = useCart((s) => s.add);
-
   const [sizeId, setSizeId] = useState(dish.sizes?.[0]?.id ?? "std");
   const [extras, setExtras] = useState<string[]>([]);
   const [sauces, setSauces] = useState<string[]>([]);
   const [note, setNote] = useState("");
-  const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const size = dish.sizes?.find((s) => s.id === sizeId);
   const extrasSum = extras.reduce(
@@ -54,34 +50,32 @@ function DishSheetBody({ dish, onClose }: { dish: Dish; onClose: () => void }) {
     (n, id) => n + (dish.sauces.find((e) => e.id === id)?.price ?? 0),
     0,
   );
-  const unitPrice = dish.price + (size?.priceDelta ?? 0) + extrasSum + saucesSum;
-  const total = unitPrice * qty;
+  const total = dish.price + (size?.priceDelta ?? 0) + extrasSum + saucesSum;
 
   const toggle = (list: string[], setList: (v: string[]) => void, id: string) => {
     haptic();
     setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
   };
 
-  const addToCart = () => {
-    if (added) return;
+  const orderViaWhatsApp = () => {
     haptic(14);
     const addOnNames = [
       ...extras.map((id) => dish.extras.find((e) => e.id === id)?.name ?? ""),
       ...sauces.map((id) => dish.sauces.find((e) => e.id === id)?.name ?? ""),
     ].filter(Boolean);
-    add({
-      key: [dish.id, sizeId, ...extras, ...sauces, note.trim()].join("|"),
-      dishId: dish.id,
-      name: dish.name,
-      image: dish.images[0],
-      unitPrice,
-      sizeLabel: size?.label,
-      addOns: addOnNames,
-      note: note.trim() || undefined,
-      qty,
-    });
-    setAdded(true);
-    setTimeout(onClose, 620);
+    const lines = [
+      "Здравствуйте! Хочу заказать в Maarek:",
+      `• ${dish.name}${size ? ` (${size.label})` : ""}`,
+      ...(addOnNames.length ? [`  + ${addOnNames.join(", ")}`] : []),
+      ...(note.trim() ? [`  Пожелание: ${note.trim()}`] : []),
+      `Итого: ${money(total)}`,
+    ];
+    window.open(
+      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`,
+      "_blank",
+    );
+    setSent(true);
+    setTimeout(() => setSent(false), 1500);
   };
 
   return (
@@ -273,37 +267,37 @@ function DishSheetBody({ dish, onClose }: { dish: Dish; onClose: () => void }) {
         </section>
       </div>
 
-      {/* прилипшая кнопка */}
+      {/* прилипшая кнопка — заказ через WhatsApp */}
       <div className="sticky bottom-0 z-10 border-t border-line bg-card/95 backdrop-blur-xl px-5 pt-3 pb-safe">
-        <div className="flex items-center gap-3 pb-2">
-          <Stepper value={qty} onChange={setQty} />
+        <div className="pb-2">
           <Button
             size="lg"
-            className="min-w-0 flex-1 overflow-hidden"
-            onClick={addToCart}
-            aria-label={`Добавить ${qty} в корзину за ${money(total)}`}
+            className="w-full overflow-hidden"
+            onClick={orderViaWhatsApp}
+            aria-label={`Заказать в WhatsApp за ${money(total)}`}
           >
             <AnimatePresence mode="popLayout" initial={false}>
-              {added ? (
+              {sent ? (
                 <motion.span
-                  key="added"
+                  key="sent"
                   initial={{ y: 18, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 460, damping: 26 }}
                   className="flex items-center gap-2"
                 >
-                  <Check size={19} strokeWidth={3} /> Добавлено
+                  <Check size={19} strokeWidth={3} /> Открываем WhatsApp…
                 </motion.span>
               ) : (
                 <motion.span
-                  key="add"
+                  key="order"
                   initial={{ y: 18, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -18, opacity: 0 }}
                   transition={{ type: "spring", stiffness: 460, damping: 26 }}
                   className="flex items-center gap-2"
                 >
-                  В корзину
+                  <MessageCircle size={19} />
+                  Заказать в WhatsApp
                   <span className="opacity-40">·</span>
                   <AnimatedMoney value={total} />
                 </motion.span>

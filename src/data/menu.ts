@@ -24,6 +24,12 @@ const IMG = {
   drink2: u("photo-1437418747212-8d9709afab22"),
 };
 
+/** номер WhatsApp/телефона — при необходимости замените на прямой номер Maarek */
+export const PHONE = "+996503860000";
+export const WHATSAPP = "996503860000";
+export const TWO_GIS = "https://2gis.kg/bishkek/firm/70000001104039407";
+export const INSTAGRAM = "https://www.instagram.com/maarek_bishkek/";
+
 export const RESTAURANT: Restaurant = {
   name: "Maarek",
   tagline: "Ресторан · Панорама города · Халал",

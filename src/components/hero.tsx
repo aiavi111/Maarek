@@ -1,45 +1,31 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight, BadgeCheck, ChevronDown, Clock, MapPin, Share, Star } from "lucide-react";
-import { RESTAURANT } from "@/data/menu";
-import { IconButton } from "@/components/ui/icon-button";
-import { Logo } from "@/components/logo";
+import { ArrowUpRight, Clock, Instagram, MapPin, Phone, Star } from "lucide-react";
+import { INSTAGRAM, PHONE, RESTAURANT, TWO_GIS, WHATSAPP } from "@/data/menu";
+import { Button } from "@/components/ui/button";
+import { Logo, Mark } from "@/components/logo";
 import { plural } from "@/lib/utils";
 
 const spring = { type: "spring", stiffness: 220, damping: 26 } as const;
 
+/** шапка-визитка: баннер, монограмма, контакты, связь в один тап */
 export function Hero() {
   const { scrollY } = useScroll();
-  const parallax = useTransform(scrollY, [0, 460], [0, 140]);
-  const [copied, setCopied] = useState(false);
+  const parallax = useTransform(scrollY, [0, 380], [0, 110]);
 
-  const share = async () => {
-    const data = {
-      title: "Maarek — Ресторан",
-      url: "https://maarek.vercel.app",
-    };
-    try {
-      if (navigator.share) await navigator.share(data);
-      else {
-        await navigator.clipboard.writeText(data.url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1400);
-      }
-    } catch {
-      /* закрыли шэринг */
-    }
-  };
+  const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+    "Здравствуйте! Хочу забронировать стол в Maarek.",
+  )}`;
 
   return (
     <header className="relative">
-      {/* ── фото с параллаксом ── */}
-      <div className="relative h-[440px] lg:h-[490px] overflow-hidden">
+      {/* баннер */}
+      <div className="relative h-[240px] overflow-hidden lg:h-[320px]">
         <motion.div style={{ y: parallax }} className="absolute inset-0">
           <motion.div
-            initial={{ scale: 1.14, opacity: 0 }}
+            initial={{ scale: 1.12, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0"
@@ -49,106 +35,114 @@ export function Hero() {
               alt="Зал ресторана Maarek"
               fill
               priority
-              sizes="430px"
+              sizes="(max-width: 430px) 100vw, 1440px"
               className="object-cover"
             />
           </motion.div>
         </motion.div>
-        {/* кремовый градиент: фото мягко перетекает в страницу, текст поверх — чёрный */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/10 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-base via-base/70 to-transparent" />
-
-        {/* верхние кнопки */}
-        <motion.div
-          initial={{ y: -16, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ ...spring, delay: 0.15 }}
-          className="absolute inset-x-0 top-0 pt-safe px-5 lg:px-10 flex items-center justify-between"
-        >
-          <button
-            className="flex items-center gap-1.5 rounded-full bg-black/35 border border-white/20 backdrop-blur-xl px-3.5 h-11 text-[13px] font-semibold text-white cursor-pointer"
-            aria-label="Изменить адрес доставки"
-          >
-            <MapPin size={14} className="text-white/70" />
-            Доставка · <span>Дом</span>
-            <ChevronDown size={14} className="text-white/70" />
-          </button>
-          <IconButton
-            label={copied ? "Ссылка скопирована" : "Поделиться"}
-            onClick={share}
-          >
-            {copied ? <BadgeCheck size={18} /> : <Share size={17} />}
-          </IconButton>
-        </motion.div>
-
-        {/* имя ресторана */}
-        {/* на ноуте поднимаем текст, чтобы карточка условий его не перекрывала */}
-        <div className="absolute inset-x-0 bottom-0 px-5 pb-5 lg:px-10 lg:pb-24 text-fg">
-          <motion.div
-            initial={{ y: 28, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ ...spring, delay: 0.25 }}
-          >
-            <Logo className="text-[24px] lg:text-[30px] text-fg" />
-            <p className="mt-2.5 text-[15px] font-medium text-mute">
-              {RESTAURANT.tagline}
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ y: 28, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ ...spring, delay: 0.34 }}
-            className="mt-3.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px] font-medium text-mute"
-          >
-            <span className="flex items-center gap-1 font-bold text-fg">
-              <Star size={14} className="fill-star text-star" />
-              {RESTAURANT.rating}
-            </span>
-            <span>
-              ({RESTAURANT.reviews.toLocaleString("ru-RU")}{" "}
-              {plural(RESTAURANT.reviews, ["оценка", "оценки", "оценок"])})
-            </span>
-            <span className="text-dim">·</span>
-            <span className="flex items-center gap-1">
-              <Clock size={13} />
-              {RESTAURANT.deliveryTime}
-            </span>
-            <span className="text-dim">·</span>
-            <span>{RESTAURANT.distance}</span>
-          </motion.div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-base to-transparent" />
       </div>
 
-      {/* ── адрес: ведёт на карточку в 2ГИС ── */}
-      <motion.a
-        href="https://2gis.kg/bishkek/firm/70000001104039407"
-        target="_blank"
-        rel="noopener noreferrer"
-        initial={{ y: 32, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ ...spring, delay: 0.42 }}
-        className="relative z-10 mx-5 -mt-1 flex items-center gap-3.5 rounded-3xl border border-line bg-card/85 backdrop-blur-2xl p-4 shadow-lift cursor-pointer lg:mx-auto lg:-mt-14 lg:max-w-[760px]"
-        aria-label="Открыть адрес в 2ГИС"
-      >
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent text-onfg">
-          <MapPin size={19} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[14.5px] font-bold">
-            {RESTAURANT.address}
-          </span>
-          <span className="mt-0.5 flex items-center gap-1.5 text-[12px] font-medium text-dim">
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf/50" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-leaf" />
+      {/* аватар-монограмма */}
+      <div className="relative z-10 -mt-12 flex flex-col items-center px-5 text-center">
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ ...spring, delay: 0.15 }}
+          className="grid size-24 place-items-center rounded-full border border-accent/40 bg-card shadow-lift ring-4 ring-base"
+        >
+          <Mark className="h-9 w-auto text-accent" />
+        </motion.div>
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ ...spring, delay: 0.25 }}
+          className="mt-4"
+        >
+          <Logo className="justify-center text-[22px] lg:text-[26px] text-fg" />
+          <p className="mt-2 text-[14px] font-medium text-mute">
+            {RESTAURANT.tagline}
+          </p>
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-[13.5px] font-medium text-mute">
+            <Star size={14} className="fill-star text-star" />
+            <span className="font-bold text-fg">{RESTAURANT.rating}</span>
+            <span>
+              · {RESTAURANT.reviews.toLocaleString("ru-RU")}{" "}
+              {plural(RESTAURANT.reviews, ["оценка", "оценки", "оценок"])} в 2ГИС
             </span>
-            Открыто · {RESTAURANT.hours} · Смотреть в 2ГИС
-          </span>
-        </span>
-        <ArrowUpRight size={18} className="shrink-0 text-dim" />
-      </motion.a>
+          </p>
+        </motion.div>
+
+        {/* инфо-строки */}
+        <motion.div
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ ...spring, delay: 0.35 }}
+          className="mt-6 w-full max-w-[560px] overflow-hidden rounded-3xl border border-line bg-card text-left shadow-lift"
+        >
+          <a
+            href={TWO_GIS}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3.5 px-4 py-3.5 active:bg-veil transition-colors"
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+              <MapPin size={18} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[14px] font-semibold">
+                {RESTAURANT.address}
+              </span>
+              <span className="text-[12px] font-medium text-dim">
+                Панорама города · Смотреть в 2ГИС
+              </span>
+            </span>
+            <ArrowUpRight size={16} className="shrink-0 text-dim" />
+          </a>
+          <div className="border-t border-line" />
+          <div className="flex items-center gap-3.5 px-4 py-3.5">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+              <Clock size={18} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-1.5 text-[14px] font-semibold">
+                <span className="relative flex size-1.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf/50" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-leaf" />
+                </span>
+                Открыто · {RESTAURANT.hours}
+              </span>
+              <span className="text-[12px] font-medium text-dim">
+                Ежедневно · завтраки с 11:00
+              </span>
+            </span>
+          </div>
+        </motion.div>
+
+        {/* кнопки связи */}
+        <motion.div
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ ...spring, delay: 0.45 }}
+          className="mt-4 w-full max-w-[560px]"
+        >
+          <Button size="lg" className="w-full" onClick={() => window.open(wa, "_blank")}>
+            Забронировать стол в WhatsApp
+          </Button>
+          <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+            <Button variant="glass" onClick={() => (window.location.href = `tel:${PHONE}`)}>
+              <Phone size={17} />
+              Позвонить
+            </Button>
+            <Button variant="glass" onClick={() => window.open(INSTAGRAM, "_blank")}>
+              <Instagram size={17} />
+              Instagram
+            </Button>
+          </div>
+        </motion.div>
+      </div>
     </header>
   );
 }
