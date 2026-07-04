@@ -8,10 +8,13 @@ import { Hero } from "@/components/hero";
 import { CategoryNav, type CategoryFilter } from "@/components/category-nav";
 import { DishGrid } from "@/components/dish-grid";
 import { DishSheet } from "@/components/dish-sheet";
+import { CartFab } from "@/components/cart/cart-fab";
+import { CartSheet } from "@/components/cart/cart-sheet";
 
 export default function HomePage() {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [activeDish, setActiveDish] = useState<Dish | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const { data: dishes, isLoading } = useQuery({
     queryKey: ["menu"],
@@ -34,7 +37,7 @@ export default function HomePage() {
 
   return (
     <>
-      <main className="pb-16">
+      <main className="pb-36">
         <Hero />
         <div className="mt-8">
           <CategoryNav active={category} onChange={setCategory} />
@@ -54,6 +57,8 @@ export default function HomePage() {
       </main>
 
       <DishSheet dish={activeDish} onClose={() => setActiveDish(null)} />
+      <CartFab onOpen={() => setCartOpen(true)} hidden={cartOpen || !!activeDish} />
+      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 }
